@@ -1,20 +1,42 @@
 
 import {
+  Avatar,
   Flex,
   Box,
   Heading,
   Button,
   IconButton,
   useDisclosure,
+  Text,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  getAuthenticationStatus,
+  handleLogout,
+  getAllLocalStorageItems
+} from "../helpers/handleAuthentication";
+import { useEffect, useState } from "react";
 
 function Header() {
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    getAuthenticationStatus.isAuthenticated
+  );
   const { isOpen, onOpen, onClose } = useDisclosure();
   const MotionBox = motion(Box);
   const MotionIconButton = motion(IconButton);
+  const username = getAllLocalStorageItems().name;
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const authStatus = getAuthenticationStatus();
+      setIsAuthenticated(authStatus.isAuthenticated);
+    };
+    window.addEventListener("storage", handleStorageChange);
+    handleStorageChange();
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   return (
     <>
@@ -32,19 +54,6 @@ function Header() {
         </Heading>
 
         <Flex gap="3" display={["none", "none", "none", "flex"]}>
-          <Link to="/">
-            <Button
-              bg="hemoPrimary"
-              color="headerColor"
-              py="6"
-              px="10"
-              borderRadius="23"
-              _hover={{ bg: "hemoPrimaryHover" }}
-            >
-              Pagina Principal
-            </Button>
-          </Link>
-
           <Link to="/login-doador">
             <Button
               bg="hemoPrimary"
@@ -135,53 +144,79 @@ function Header() {
                 align="center"
                 gap={["4", "12"]}
               >
-                <Link to="/login-doador">
-                  <Button
-                    bg="headerColor"
-                    color="hemoPrimary"
-                    textDecoration="underline"
-                    fontSize={["2xl", "2xl", "5xl", "5xl"]}
-                    onClick={onClose}
-                  >
-                    Entrar como Doador
-                  </Button>
-                </Link>
-                <Link to="/login-clinica">
-                  <Button
-                    bg="headerColor"
-                    color="hemoPrimary"
-                    textDecoration="underline"
-                    fontSize={["2xl", "2xl", "5xl", "5xl"]}
-                    onClick={onClose}
-                  >
-                    Entrar como Clinica
-                  </Button>
-                </Link>
-                <Link to="/cadastro-doador">
-                  <Button
-                    bg="headerColor"
-                    color="hemoPrimary"
-                    borderRadius="23"
-                    textDecoration="underline"
-                    fontSize={["2xl", "2xl", "5xl", "5xl"]}
-                    onClick={onClose}
-                  >
-                    Cadastro Doador
-                  </Button>
-                </Link>
+                {!isAuthenticated && (
+                  <>
+                    <Link to="/login-doador">
+                      <Button
+                        bg="headerColor"
+                        color="hemoPrimary"
+                        textDecoration="underline"
+                        fontSize={["2xl", "2xl", "5xl", "5xl"]}
+                        onClick={onClose}
+                      >
+                        Entrar como Doador
+                      </Button>
+                    </Link>
+                    <Link to="/login-clinica">
+                      <Button
+                        bg="headerColor"
+                        color="hemoPrimary"
+                        textDecoration="underline"
+                        fontSize={["2xl", "2xl", "5xl", "5xl"]}
+                        onClick={onClose}
+                      >
+                        Entrar como Clinica
+                      </Button>
+                    </Link>
+                    <Link to="/cadastro-doador">
+                      <Button
+                        bg="headerColor"
+                        color="hemoPrimary"
+                        borderRadius="23"
+                        textDecoration="underline"
+                        fontSize={["2xl", "2xl", "5xl", "5xl"]}
+                        onClick={onClose}
+                      >
+                        Cadastro Doador
+                      </Button>
+                    </Link>
+                    <Link to="/cadastro-clinica">
+                      <Button
+                        bg="headerColor"
+                        color="hemoPrimary"
+                        borderRadius="23"
+                        textDecoration="underline"
+                        fontSize={["2xl", "2xl", "5xl", "5xl"]}
+                        onClick={onClose}
+                      >
+                        Cadastro Clinica
+                      </Button>
+                    </Link>
+                  </>
+                )}
 
-                <Link to="/cadastro-clinica">
-                  <Button
-                    bg="headerColor"
-                    color="hemoPrimary"
-                    borderRadius="23"
-                    textDecoration="underline"
-                    fontSize={["2xl", "2xl", "5xl", "5xl"]}
-                    onClick={onClose}
-                  >
-                    Cadastro Clinica
-                  </Button>
-                </Link>
+                {isAuthenticated && (
+                  <>
+                    <Avatar
+                      name="Dereck Portela"
+                      size="md"
+                      color="hemoSecondary"
+                      backgroundColor="hemoPrimary"
+                    />
+                    <Link to="/login-doador">
+                      <Button
+                        bg="headerColor"
+                        color="hemoPrimary"
+                        textDecoration="underline"
+                        fontSize={["2xl", "3xl", "5xl", "5xl"]}
+                        onClick={() => {onClose(); handleLogout(); }}
+                        
+                      >
+                        Sair
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </Flex>
             </MotionBox>
           ) : null}
